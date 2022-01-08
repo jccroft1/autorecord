@@ -40,30 +40,6 @@ const (
 	defaultTimeFormat = "2006-01-02 15:04:05"
 )
 
-var (
-	state          = ""
-	requiredScopes = []string{
-		"user-modify-playback-state", // Start or resume playback
-		"user-read-playback-state",   // Get Players
-		"user-read-private",          // Search for an item
-	}
-)
-
-type TokenResponse struct {
-	AccessToken string `json:"access_token"`
-	// TokenType string `json:"token_type"`
-	// Scope string `json:"scope"`
-	Expiry       int    `json:"expires_in"`
-	RefreshToken string `json:"refresh_token"`
-}
-
-type RefreshResponse struct {
-	AccessToken string `json:"access_token"`
-	// TokenType string `json:"token_type"`
-	// Scope string `json:"scope"`
-	Expiry int `json:"expires_in"`
-}
-
 type SearchResponse struct {
 	Albums AlbumList `json:"albums"`
 	Tracks TrackList `json:"tracks"`
@@ -120,50 +96,6 @@ func HasPlayer() bool {
 		return false
 	}
 	return true
-}
-
-func GetAuthURL() (string, error) {
-	client_id := os.Getenv(envClientID)
-	if client_id == "" {
-		return "", fmt.Errorf("Failed to get Spotify client_id from environment")
-	}
-
-	state = fmt.Sprint(rand.Int())
-
-	v := url.Values{
-		"response_type": []string{"code"},
-		"client_id":     []string{client_id},
-		"scope":         []string{strings.Join(requiredScopes, " ")},
-		"redirect_uri":  []string{callbackURL},
-		"state":         []string{state},
-	}
-	return fmt.Sprintf(authURL, v.Encode()), nil
-}
-
-func ProcessCallback(qs url.Values) error {
-	if qs.Get("state") != state {
-		return fmt.Errorf("state validation failed")
-	}
-
-	// extract query string stuff
-	code := qs.Get("code")
-	if code == "" {
-		return fmt.Errorf("Failed to get code: %v", qs.Get("error"))
-	}
-
-	requestTime := time.Now()
-	tokenData, err := getAuthToken(code)
-	if err != nil {
-		return err
-	}
-	if tokenData.AccessToken == "" || tokenData.RefreshToken == "" {
-		return fmt.Errorf("spotify tokens not returned")
-	}
-	config.Set(configExpiry, requestTime.Add(time.Duration(tokenData.Expiry)*time.Second).Format(defaultTimeFormat))
-	config.Set(configAccessToken, tokenData.AccessToken)
-	config.Set(configRefreshToken, tokenData.RefreshToken)
-
-	return nil
 }
 
 func ProcessPlayer(player string) {
@@ -296,6 +228,76 @@ func PlayItem(uri string) error {
 	return nil
 }
 
+// Auth stuff
+
+var (
+	state          = ""
+	requiredScopes = []string{
+		"user-modify-playback-state", // Start or resume playback
+		"user-read-playback-state",   // Get Players
+		"user-read-private",          // Search for an item
+	}
+)
+
+type TokenResponse struct {
+	AccessToken string `json:"access_token"`
+	// TokenType string `json:"token_type"`
+	// Scope string `json:"scope"`
+	Expiry       int    `json:"expires_in"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RefreshResponse struct {
+	AccessToken string `json:"access_token"`
+	// TokenType string `json:"token_type"`
+	// Scope string `json:"scope"`
+	Expiry int `json:"expires_in"`
+}
+
+func ProcessCallback(qs url.Values) error {
+	if qs.Get("state") != state {
+		return fmt.Errorf("state validation failed")
+	}
+
+	// extract query string stuff
+	code := qs.Get("code")
+	if code == "" {
+		return fmt.Errorf("Failed to get code: %v", qs.Get("error"))
+	}
+
+	requestTime := time.Now()
+	tokenData, err := getAuthToken(code)
+	if err != nil {
+		return err
+	}
+	if tokenData.AccessToken == "" || tokenData.RefreshToken == "" {
+		return fmt.Errorf("spotify tokens not returned")
+	}
+	config.Set(configExpiry, requestTime.Add(time.Duration(tokenData.Expiry)*time.Second).Format(defaultTimeFormat))
+	config.Set(configAccessToken, tokenData.AccessToken)
+	config.Set(configRefreshToken, tokenData.RefreshToken)
+
+	return nil
+}
+
+func GetAuthURL() (string, error) {
+	client_id := os.Getenv(envClientID)
+	if client_id == "" {
+		return "", fmt.Errorf("Failed to get Spotify client_id from environment")
+	}
+
+	state = fmt.Sprint(rand.Int())
+
+	v := url.Values{
+		"response_type": []string{"code"},
+		"client_id":     []string{client_id},
+		"scope":         []string{strings.Join(requiredScopes, " ")},
+		"redirect_uri":  []string{callbackURL},
+		"state":         []string{state},
+	}
+	return fmt.Sprintf(authURL, v.Encode()), nil
+}
+
 func getAuthToken(code string) (TokenResponse, error) {
 	form := url.Values{}
 	form.Set("grant_type", "authorization_code")
@@ -354,7 +356,7 @@ func checkToken() error {
 		return nil
 	}
 
-	log.Println("time expired, refreshing")
+	log.Println("expiry token expired, refreshing")
 
 	requestTime := time.Now()
 	tokenData, err := getRefreshToken(config.Get(configRefreshToken))

@@ -2,35 +2,40 @@ package camera
 
 import (
 	"encoding/base64"
+	"fmt"
 	"io/ioutil"
+
+	"gocv.io/x/gocv"
 )
 
 // Snap opens the camera, takes a picture and returns the image data
-// func Snap() (string, error) {
-// 	deviceID := 0
-// 	webcam, err := gocv.OpenVideoCapture(deviceID)
-// 	if err != nil {
-// 		return "", fmt.Errorf("error opening video capture device: %v", deviceID)
-// 	}
-// 	defer webcam.Close()
+func Snap() (string, error) {
+	deviceID := 0
+	webcam, err := gocv.OpenVideoCapture(deviceID)
+	if err != nil {
+		return "", fmt.Errorf("error opening video capture device: %v", deviceID)
+	}
+	defer webcam.Close()
 
-// 	mat := gocv.NewMat()
-// 	defer mat.Close()
+	mat := gocv.NewMat()
+	defer mat.Close()
 
-// 	if ok := webcam.Read(&mat); !ok {
-// 		return "", fmt.Errorf("cannot read device %v", deviceID)
-// 	}
-// 	if mat.Empty() {
-// 		return "", fmt.Errorf("no image on device %v", deviceID)
-// 	}
+	if ok := webcam.Read(&mat); !ok {
+		return "", fmt.Errorf("cannot read device %v", deviceID)
+	}
+	if mat.Empty() {
+		return "", fmt.Errorf("no image on device %v", deviceID)
+	}
 
-// 	out, err := gocv.IMEncode(gocv.PNGFileExt, mat)
-// 	if err != nil {
-// 		return "", err
-// 	}
+	out, err := gocv.IMEncode(gocv.PNGFileExt, mat)
+	if err != nil {
+		return "", err
+	}
 
-// 	return base64.StdEncoding.EncodeToString(out), nil
-// }
+	gocv.IMWrite("cam1.jpg", mat)
+
+	return base64.StdEncoding.EncodeToString(out), nil
+}
 
 func OpenImage(filename string) (string, error) {
 	// mat := gocv.IMRead(filename, gocv.IMReadColor)

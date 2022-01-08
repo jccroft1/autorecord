@@ -12,6 +12,10 @@ import (
 )
 
 const (
+	skipCamera        = true
+	skipImageSearch   = false
+	skipSpotifySearch = false
+
 	errorText = "Oops, something went wrong..."
 
 	spotifyAuthText   = "Setup your Spotify account. We'll redirect you to login to Spotify so you can approve this app."
@@ -60,9 +64,9 @@ func spotifyPlayerOptions(w http.ResponseWriter, req *http.Request) {
 
 	items := []web.Item{}
 	for _, device := range devices {
-		// if device.Restricted {
-		// 	continue
-		// }
+		if device.Restricted {
+			continue
+		}
 		items = append(items,
 			web.Item{Text: fmt.Sprintf("%v (%v)", device.Name, device.Type), Path: fmt.Sprintf("/spotify/player/select?id=%v", device.ID)},
 		)
@@ -80,28 +84,45 @@ func spotifyPlayerSelect(w http.ResponseWriter, req *http.Request) {
 func doHandler(w http.ResponseWriter, req *http.Request) {
 	var image string
 	var err error
-	image, err = camera.OpenImage("file2.jpg")
-	if err != nil {
-		log.Fatal(err)
-	}
-	// image, err = camera.Snap()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	text, err := vision.Search(image)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// text := "parachutes coldplay"
-	result, err := spotify.SearchAlbum(text)
-	if err != nil {
-		log.Println(err)
-		fmt.Fprint(w, errorText)
-		return
+	if skipCamera {
+		image, err = camera.OpenImage("file2.jpg")
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		image, err = camera.Snap()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	fmt.Fprint(w, fmt.Sprintln("Found: ", result))
+	var text string
+	if skipImageSearch {
+		text = "parachutes coldplay"
+	} else {
+		text, err = vision.Search(image)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("image search result", text)
+	}
+
+	fmt.Fprint(w, fmt.Sprintln("Image search result: ", text))
+
+	var result string
+	if skipSpotifySearch {
+		result = "spotify:album:6ZG5lRT77aJ3btmArcykra"
+	} else {
+		result, err = spotify.SearchAlbum(text)
+		if err != nil {
+			log.Println(err)
+			fmt.Fprint(w, errorText)
+			return
+		}
+		log.Println("Spotify result: ", result)
+	}
+
+	fmt.Fprint(w, fmt.Sprintln("Spotify result: ", result))
 
 	err = spotify.PlayItem(result)
 	if err != nil {

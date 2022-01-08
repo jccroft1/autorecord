@@ -87,15 +87,12 @@ func Search(imageData string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("Response status:", resp.Status)
-
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
 
 	var response BatchAnnotateResponse
-	fmt.Println(string(respBytes))
 
 	err = json.Unmarshal(respBytes, &response)
 	if err != nil {
