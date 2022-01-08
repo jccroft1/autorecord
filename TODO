@@ -1,0 +1,33 @@
+# Work Items 
+
+## Arch 
+
+- Web server run on boot 
+- Button wait program runs on boot 
+    - Pressing button runs runs web request 
+
+## General 
+
+- Expose logs on web page, write to temp file? Or store in memory and write to stdout? 
+
+## Spotify Integration 
+
+### Auth flow 
+
+- Choose Player 
+    - Can they change Player? 
+
+## mDNS 
+
+- Do it when prepping Pi, document for when ready 
+https://bloggerbrothers.com/2017/01/08/name-your-pis-with-mdns-forget-the-ips-with-zeroconf/ 
+
+## To Buy 
+
+- Record stand 
+- Webcam/ camera for picture 
+- Wifi dongle vs. Pi 4? 
+- Button 
+    https://github.com/stianeikeland/go-rpio/blob/master/examples/event/event.go
+    https://thepihut.com/products/massive-arcade-button-with-led-100mm-red
+
