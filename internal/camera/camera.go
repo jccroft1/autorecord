@@ -33,14 +33,16 @@ func Snap() (string, error) {
 	height := mat.Rows()
 	square := image.Rect(0, middle-(height/2), middle+(height/2), mat.Rows())
 	croppedMat := mat.Region(square)
-	mat = croppedMat.Clone()
+	defer croppedMat.Close()
+	squareMat := croppedMat.Clone()
+	defer squareMat.Close()
 
-	out, err := gocv.IMEncode(gocv.PNGFileExt, mat)
+	out, err := gocv.IMEncode(gocv.PNGFileExt, squareMat)
 	if err != nil {
 		return "", err
 	}
 
-	gocv.IMWrite("cam1.jpg", mat)
+	gocv.IMWrite("cam1.jpg", squareMat)
 
 	return base64.StdEncoding.EncodeToString(out), nil
 }

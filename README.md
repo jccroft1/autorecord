@@ -2,6 +2,13 @@
 
 Automatically play music though Sonos automatically. 
 
+## Pre-requisites 
+
+- Git 
+- Golang 
+- OpenCV https://github.com/hybridgroup/gocv 
+    Follow the steps on the README for your OS
+
 ## Installation 
 
 Clone the repo to your Go /src directory. 
@@ -30,12 +37,6 @@ export SPOTIFY_CLIENTSECRET=ABC123
 ```
 
 Setup the main autorecord program and button trigger program on boot. 
-
-## Development 
-
-Required 
-- OpenCV https://github.com/hybridgroup/gocv 
-    Follow the steps on the README for your OS
 
 ## Further Reading
 
