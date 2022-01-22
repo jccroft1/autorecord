@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	skipCamera        = true
+	skipCamera        = false
 	skipImageSearch   = false
 	skipSpotifySearch = false
 
@@ -72,7 +72,11 @@ func spotifyPlayerOptions(w http.ResponseWriter, req *http.Request) {
 		)
 	}
 
-	web.Ask(w, "Choose a player below...", items)
+	web.Show(w, web.Page{
+		Title:      "Choose a player below...",
+		Questions:  items,
+		ShowButton: false,
+	})
 }
 
 func spotifyPlayerSelect(w http.ResponseWriter, req *http.Request) {
@@ -107,7 +111,11 @@ func doHandler(w http.ResponseWriter, req *http.Request) {
 		log.Println("image search result", text)
 	}
 
-	fmt.Fprint(w, fmt.Sprintln("Image search result: ", text))
+	web.Show(w, web.Page{
+		Title:      fmt.Sprintln("Found: ", text),
+		Questions:  []web.Item{},
+		ShowButton: true,
+	})
 
 	var result string
 	if skipSpotifySearch {
@@ -121,8 +129,6 @@ func doHandler(w http.ResponseWriter, req *http.Request) {
 		}
 		log.Println("Spotify result: ", result)
 	}
-
-	fmt.Fprint(w, fmt.Sprintln("Spotify result: ", result))
 
 	err = spotify.PlayItem(result)
 	if err != nil {
@@ -144,9 +150,17 @@ func defaultHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if len(todo) > 0 {
-		web.Ask(w, "We need to sort out some stuff...", todo)
+		web.Show(w, web.Page{
+			Title:      "We need to sort out some stuff...",
+			Questions:  todo,
+			ShowButton: false,
+		})
 		return
 	}
 
-	web.Ask(w, "You're good to go!", []web.Item{})
+	web.Show(w, web.Page{
+		Title:      "You're good to go!",
+		Questions:  []web.Item{},
+		ShowButton: true,
+	})
 }

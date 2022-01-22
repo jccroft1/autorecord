@@ -3,6 +3,7 @@ package camera
 import (
 	"encoding/base64"
 	"fmt"
+	"image"
 	"io/ioutil"
 
 	"gocv.io/x/gocv"
@@ -26,6 +27,13 @@ func Snap() (string, error) {
 	if mat.Empty() {
 		return "", fmt.Errorf("no image on device %v", deviceID)
 	}
+
+	maxWidth := mat.Cols()
+	middle := maxWidth / 2
+	height := mat.Rows()
+	square := image.Rect(0, middle-(height/2), middle+(height/2), mat.Rows())
+	croppedMat := mat.Region(square)
+	mat = croppedMat.Clone()
 
 	out, err := gocv.IMEncode(gocv.PNGFileExt, mat)
 	if err != nil {

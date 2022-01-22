@@ -33,9 +33,9 @@ const askTpl = `
         </div>
         <div class="navbar navbar-dark bg-dark shadow-sm">
             <div class="container d-flex justify-content-between">
-            <a href="#" class="navbar-brand d-flex align-items-center">
-                <strong>Auto Record</strong>
-            </a>
+                <a href="#" class="navbar-brand d-flex align-items-center">
+                    <strong>Auto Record</strong>
+                </a>
             </div>
         </div>
     </header>
@@ -43,6 +43,8 @@ const askTpl = `
         <section class="jumbotron text-center">
             <div class="container">
                <h1 class="jumbotron-heading">{{.Title}}</h1>
+
+               {{if .ShowButton}}<a href="/do" class="btn btn-primary my-2">Scan it!</a> {{end}}
 
                 <div class="row">
                     {{range $index, $item := .Items}}
@@ -66,24 +68,32 @@ const askTpl = `
 </html>
 `
 
+type Page struct {
+	Title      string
+	Questions  []Item
+	ShowButton bool
+}
+
 type Item struct {
 	Text string
 	Path string
 }
 
-// Ask writes a webpage to io.Writer asking user to pick from a list of items
-func Ask(w io.Writer, title string, items []Item) {
+// Show writes the main web page with the given info
+func Show(w io.Writer, page Page) {
 	t, err := template.New("webpage").Parse(askTpl)
 	if err != nil {
 		panic(err)
 	}
 
 	data := struct {
-		Title string
-		Items []Item
+		Title      string
+		Items      []Item
+		ShowButton bool
 	}{
-		Title: title,
-		Items: items,
+		Title:      page.Title,
+		Items:      page.Questions,
+		ShowButton: page.ShowButton,
 	}
 
 	err = t.Execute(w, data)
