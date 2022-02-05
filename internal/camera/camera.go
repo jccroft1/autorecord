@@ -44,7 +44,7 @@ func Snap() (string, error) {
 
 	gocv.IMWrite("cam1.jpg", squareMat)
 
-	return base64.StdEncoding.EncodeToString(out), nil
+	return base64.StdEncoding.EncodeToString(out.GetBytes()), nil
 }
 
 func OpenImage(filename string) (string, error) {
