@@ -6,8 +6,12 @@ Automatically play music though Sonos automatically.
 
 - Git 
 - Golang 
-- OpenCV https://github.com/hybridgroup/gocv 
-    Follow the steps on the README for your OS
+- fswebcam 
+    https://github.com/fsphil/fswebcam
+    May need the below if on Pi 
+```bash 
+sudo apt-get install libgd-dev
+```
 
 ## Installation 
 
