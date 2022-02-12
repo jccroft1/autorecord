@@ -4,9 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"os/exec"
-	"syscall"
 )
 
 var binary string
@@ -60,10 +58,9 @@ func init() {
 func Snap() (string, error) {
 	filename := "snap.jpg"
 
-	args := []string{"fswebcam", "--delay", "2", "--skip", "20", "--no-banner", filename}
-	env := os.Environ()
-
-	err := syscall.Exec(binary, args, env)
+	args := []string{"--delay", "2", "--skip", "20", "--no-banner", filename}
+	cmd := exec.Command("fswebcam", args...)
+	err := cmd.Run()
 	if err != nil {
 		return "", err
 	}

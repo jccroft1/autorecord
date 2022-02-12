@@ -31,7 +31,7 @@ func main() {
 	http.HandleFunc("/do", doHandler)
 
 	log.Println("starting server")
-	http.ListenAndServe(":80", nil)
+	fmt.Println(http.ListenAndServe(":80", nil))
 }
 
 func spotifyAuth(w http.ResponseWriter, req *http.Request) {
